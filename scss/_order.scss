@@ -1,0 +1,43 @@
+.orderPage-list{
+    padding-top: $spacer-md;
+    padding-bottom: $spacer-md;
+    display: flex;
+    flex-direction: column;
+    .discardAllBtn{
+        align-self: flex-end;
+        margin-bottom: 12px;
+    }
+}
+.orderPage-table{
+    border: 1px solid #000000;
+    th, td{
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #000000;
+    }
+}
+.delSingleOrder-Btn{
+    display: block;
+    background-color: #C44021;
+    color: #fff;
+    border: 0;
+    padding: 5px 10px;
+    cursor: pointer;
+    &:hover{
+        opacity: 0.8;
+    }
+}
+.status-unDone{
+    background-color: #747474;
+    color: #FFFFFF;
+    &:hover{
+        background-color: #000000;
+    }
+}
+.status-done{
+    background-color: #000000;
+    color: #FFFFFF;
+    &:hover{
+        background-color: #747474;
+    }
+}
