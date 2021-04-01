@@ -1,63 +1,3 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const ele = document.querySelector('.recommendation-wall');
-    ele.style.cursor = 'grab';
-    let pos = { top: 0, left: 0, x: 0, y: 0 };
-    const mouseDownHandler = function(e) {
-        ele.style.cursor = 'grabbing';
-        ele.style.userSelect = 'none';
-
-        pos = {
-            left: ele.scrollLeft,
-            top: ele.scrollTop,
-            // Get the current mouse position
-            x: e.clientX,
-            y: e.clientY,
-        };
-
-        document.addEventListener('mousemove', mouseMoveHandler);
-        document.addEventListener('mouseup', mouseUpHandler);
-    };
-    const mouseMoveHandler = function(e) {
-        // How far the mouse has been moved
-        const dx = e.clientX - pos.x;
-        const dy = e.clientY - pos.y;
-
-        // Scroll the element
-        ele.scrollTop = pos.top - dy;
-        ele.scrollLeft = pos.left - dx;
-    };
-    const mouseUpHandler = function() {
-        ele.style.cursor = 'grab';
-        ele.style.removeProperty('user-select');
-
-        document.removeEventListener('mousemove', mouseMoveHandler);
-        document.removeEventListener('mouseup', mouseUpHandler);
-    };
-    // Attach the handler
-    ele.addEventListener('mousedown', mouseDownHandler);
-});
-// menu 切換
-let menuOpenBtn = document.querySelector('.menuToggle');
-let linkBtn = document.querySelectorAll('.topBar-menu a');
-let menu = document.querySelector('.topBar-menu');
-menuOpenBtn.addEventListener('click', menuToggle);
-
-linkBtn.forEach((item) => {
-    item.addEventListener('click', closeMenu);
-})
-
-function menuToggle() {
-    if(menu.classList.contains('openMenu')) {
-        menu.classList.remove('openMenu');
-    }else {
-        menu.classList.add('openMenu');
-    }
-}
-function closeMenu() {
-    menu.classList.remove('openMenu');
-}
-
-
 // 以下開始撰寫 JS 程式碼
 let productWrap = document.querySelector('.productWrap');
 let productSelect = document.querySelector('.productSelect');
@@ -71,19 +11,18 @@ let categoryName = [];
 
 function getProduct() {
     let vm = this;
-    // console.log(this);
     let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/products`;
     axios.get(url)
         .then((res) => {
             products = [...res.data.products];
             filterCategories();
+            renderProductList();
             renderProduct(products);
         })
         .catch((error) => {
             console.log(error);
         })
 }
-
 function filterCategories() {
     let vm = this;
     categoryName = products.map((item) => {
@@ -91,6 +30,15 @@ function filterCategories() {
     })
     categoryName = categoryName.filter((element, index, self) => {
         return self.indexOf(element) === index;
+    })
+}
+// select 只能用 appendChild 填入
+function renderProductList() {
+    categoryName.forEach((item) => {
+        let options = document.createElement('option');
+        options.value = item;
+        options.textContent = item;
+        productSelect.appendChild(options);
     })
 }
 function addCart(item) {    
@@ -147,7 +95,6 @@ function renderCart() {
     let str = '';
     axios.get(url)
         .then((res) => {
-            console.log(2, res);
             let data = res.data.carts;
             if(data[0]){
                 str += `
@@ -211,7 +158,7 @@ function renderProduct(targetProduct) {
             <img src="${item.images}" alt="${item.title}">
             <a href="#" id="addCardBtn">加入購物車</a>
             <h3>${item.title}</h3>
-            <p class="originPrice">NT$${item.origin_price}</p>
+            <del class="originPrice">NT$${item.origin_price}</del>
             <p class="nowPrice">NT$${item.price}</p>
         </li>
         `
@@ -220,15 +167,10 @@ function renderProduct(targetProduct) {
     targetProduct.forEach((item, i) => {
         document.querySelectorAll('#addCardBtn')[i].addEventListener('click', addCart(item));
     })
-    // 
-    // str = `
-    //     <option value="" disabled selected hidden>全部、找新品、限時折扣</option>
-    //     <option value="全部">全部</option>
-    // `;
+    /* select 不可以用 innerHTML 來加入 option， 切換的時候文字不會跟著換*/ 
+    // str = `<option value="全部">全部</option>`;
     // categoryName.forEach((item) => {
-    //     str += `
-    //         <option value="${item}">${item}</option>
-    //     `;
+    //     str += `<option value="${item}">${item}</option>`;
     // })
     // productSelect.innerHTML = str;
 }
@@ -258,12 +200,9 @@ function keywordFilter() {
 }
 
 init();
-
 productSelect.addEventListener('change', productFilter);
-// keyWordSearch.addEventListener('click', keywordFilter);
 
 // validate.js
-
 ;(function() {
     let constraints = {
         "姓名": {
@@ -286,22 +225,16 @@ productSelect.addEventListener('change', productFilter);
                 message: "是必填的欄位"
             },
         },
-        "交易方式": {
-            presence: {
-                message: "是必填的欄位", 
-            },
-        },
     };
-    let form = document.querySelector('#orderInfo');
+    let form = document.querySelector('.orderInfo-form');
     let messages = document.querySelectorAll('[data-message]');
-    let inputs = document.querySelectorAll('.orderInfo-input input, .orderInfo-input select');
+    let inputs = document.querySelectorAll('.orderInfo-input');
     form.addEventListener('submit', formCheck);
 
     inputs.forEach((item) => {
         item.addEventListener("change", function (e) {
             e.preventDefault();
             let targetName = item.name;
-            // console.log(targetName);
             let errors = validate(form, constraints);
             let str = `[data-message="${targetName}"]`;
             if (errors) {
@@ -356,46 +289,6 @@ productSelect.addEventListener('change', productFilter);
         })
     }
 })();
-// order
-function getOrder() {
-    let vm = this;
-    // console.log(this);
-    let url = `${baseUrl}/api/livejs/v1/admin/${api_path}/orders`;
-    let data = {};
-    console.log("getOrder")
-    axios.get(url, 
-        {
-            'headers': {
-                'Authorization': 'PBZzz6dBY3Q67V6SPh4xTkfc3Oh1'
-            }
-        })
-        .then((res) => {
-            data = res.data.orders;
-            console.log(data);
-        })
-        .catch((error) => {
-            console.log(error);
-        })
-}
-getOrder();
 
-// C3.js
-let chart = c3.generate({
-    bindto: '#chart', // HTML 元素綁定
-    data: {
-        type: "pie",
-        columns: [
-        ['Louvre 雙人床架', 2],
-        ['Antony 雙人床架', 3],
-        ['Anty 雙人床架', 2],
-        ['Charles 雙人床架', 3],
-        ],
-        colors:{
-            "Louvre 雙人床架":"#301E5F",
-            "Antony 雙人床架":"#5434A7",
-            "Anty 雙人床架": "#9D7FEA",
-            "Charles 雙人床架": "#6A33F8",
-        }
-    },
-});
+
 

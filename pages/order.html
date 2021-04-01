@@ -16,32 +16,35 @@
     <nav class="topBar">
         <div class="wrap">
             <h1><a href="../index.html" class="logo">WOWOROOM</a></h1>
+            <span class="material-icons menuToggle">
+                menu
+            </span>
             <ul class="topBar-menu">
-                <li><a href="#">床墊優勢</a></li>
-                <li><a href="#">好評推薦</a></li>
-                <li><a href="#">運送方式</a></li>
-                <li><a href="#">立即預訂</a></li>
+                <li><a href="#">後台管理</a></li>
+                <li><a href="#">管理員登入</a></li>
             </ul>
         </div>
     </nav>
     <section class="wrap">
-        <h3 class="section-title">全品項營收比重</h3>
+        <h2 class="section-title">全品項營收比重</h2>
         <div id="chart"></div>
     </section>
     <section class="wrap orderPage-list">
         <a href="#" class="discardAllBtn">清除全部訂單</a>
-        <table class="orderPage-table">
-            <thead>
-                <tr>
-                    <th>訂單編號</th>
-                    <th>聯絡人</th>
-                    <th>聯絡地址</th>
-                    <th>電子郵件</th>
-                    <th>訂單品項</th>
-                    <th>訂單日期</th>
-                    <th>訂單狀態</th>
-                    <th>操作</th>
-                </tr>
+        <div class="orderTableWrap">
+            <table class="orderPage-table">
+                <!-- <thead>
+                    <tr>
+                        <th>訂單編號</th>
+                        <th>聯絡人</th>
+                        <th>聯絡地址</th>
+                        <th>電子郵件</th>
+                        <th>訂單品項</th>
+                        <th>訂單日期</th>
+                        <th>訂單狀態</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
                 <tr>
                     <td>10088377474</td>
                     <td>
@@ -50,15 +53,19 @@
                     </td>
                     <td>高雄市前鎮區六合路183巷66號</td>
                     <td>cccexample@gmail.com</td>
-                    <td>Louvre 雙人床架</td>
+                    <td>
+                        <p>Louvre 雙人床架</p>
+                    </td>
                     <td>2021/03/08</td>
-                    <td class="status-unDone">未處理</td>
+                    <td class="orderStatus orderStatus-unDone">
+                        <a href="#">未處理</a>
+                    </td>
                     <td>
                         <input type="button" class="delSingleOrder-Btn" value="刪除">
                     </td>
-                </tr>
-            </thead>
-        </table>
+                </tr> -->
+            </table>
+        </div>
     </section>
 
 <!-- C3 D3 -->
@@ -66,6 +73,30 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.18/c3.js"></script>
 <!-- axios -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="../js/all.js"></script>
+<script src="../js/order.js"></script>
+
+
+<script>
+// 預設 JS，請同學不要修改此處
+let menuOpenBtn = document.querySelector('.menuToggle');
+let linkBtn = document.querySelectorAll('.topBar-menu a');
+let menu = document.querySelector('.topBar-menu');
+menuOpenBtn.addEventListener('click', menuToggle);
+
+linkBtn.forEach((item) => {
+    item.addEventListener('click', closeMenu);
+})
+
+function menuToggle() {
+    if(menu.classList.contains('openMenu')) {
+        menu.classList.remove('openMenu');
+    }else {
+        menu.classList.add('openMenu');
+    }
+}
+function closeMenu() {
+    menu.classList.remove('openMenu');
+}
+</script>
 </body>
 </html>
