@@ -1,30 +1,22 @@
 const api_path = "jordan990301";
 const baseUrl = "https://hexschoollivejs.herokuapp.com";
+const headers = {Authorization: 'PBZzz6dBY3Q67V6SPh4xTkfc3Oh1'};
 let orderTable = document.querySelector('.orderPage-table');
-let delAllBtn = document.querySelector('.discardAllBtn');
-let orderData = {};
+let delAllBtn = document.querySelector('.discardAllOrder');
 
 function getOrder() {
-    let vm = this;
-    // console.log(this);
     let url = `${baseUrl}/api/livejs/v1/admin/${api_path}/orders`;
-    axios.get(url, 
-        {
-            'headers': {
-                'Authorization': 'PBZzz6dBY3Q67V6SPh4xTkfc3Oh1'
-            }
-        })
+    axios.get(url, {headers})
         .then((res) => {
-            orderData = res.data.orders;
-            console.log(orderData);
-            renderTable();
-            renderC3();
+            let orderData = res.data.orders;
+            renderTable(orderData);
+            renderC3(orderData);
         })
         .catch((error) => {
             console.log(error);
         })
 }
-function renderTable() {
+function renderTable(orderData) {
     let str = `
     <thead>
         <tr>
@@ -79,73 +71,51 @@ function renderTable() {
     orderData.forEach((item, i) => {
         let status = document.querySelectorAll('.orderStatus a')[i];
         let delSingleBtn = document.querySelectorAll('.delSingleOrder-Btn')[i];
-        status.addEventListener('click', editStatus(item));
-        delSingleBtn.addEventListener('click', delSingleOrder(item));
+        status.addEventListener('click', function(e){
+            e.preventDefault();
+            editStatus(item);
+        });
+        delSingleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            delSingleOrder(item);
+        });
     })
 }
 function editStatus(orderTarget) {
-    return function(e) {
-        e.preventDefault();  // 為何不用 closure 就會壞掉、自動執行?
-        let url = `${baseUrl}/api/livejs/v1/admin/${api_path}/orders`;
-        let data = {};
-        if(orderTarget.paid) {
-            data = {
-                "data": {
-                    "id": orderTarget.id,
-                    "paid": false
-                }
+    let url = `${baseUrl}/api/livejs/v1/admin/${api_path}/orders`;
+        let data = {
+            data: {
+                id: orderTarget.id,
+                paid: !orderTarget.paid
             }
-        }else {
-            data = {
-                "data": {
-                    "id": orderTarget.id,
-                    "paid": true
-                }
-            }
-        }
-        axios.put(url, {...data},
-            {
-                'headers': {
-                    'Authorization': 'PBZzz6dBY3Q67V6SPh4xTkfc3Oh1'
-                }
-            })
-            .then((res) => {
+        };
+        axios.put(url, {...data}, {headers})
+            .then(() => {
                 getOrder();
+                setTimeout(function(){ alert("成功調整狀態");}, 1000);
             })
             .catch((error) => {
                 console.log(error);
             })
-    }
 }
 function delSingleOrder(orderTarget) {
-    return function(e) {
-        e.preventDefault();  // 為何不用 closure 就會壞掉、自動執行?
-        let url = `${baseUrl}/api/livejs/v1/admin/${api_path}/orders/${orderTarget.id}`;
-        axios.delete(url,
-            {
-                'headers': {
-                    'Authorization': 'PBZzz6dBY3Q67V6SPh4xTkfc3Oh1'
-                }
-            })
-            .then((res) => {
-                getOrder();
-            })
-            .catch((error) => {
-                console.log(error);
-            })
-    }
+    let url = `${baseUrl}/api/livejs/v1/admin/${api_path}/orders/${orderTarget.id}`;
+    axios.delete(url, {headers})
+        .then(() => {
+            getOrder();
+            setTimeout(function(){ alert("成功刪除");}, 1000);
+        })
+        .catch((error) => {
+            console.log(error);
+        })
 }
 function delAllOrder(e) {
     e.preventDefault();
     let url = `${baseUrl}/api/livejs/v1/admin/${api_path}/orders`;
-    axios.delete(url,
-        {
-            'headers': {
-                'Authorization': 'PBZzz6dBY3Q67V6SPh4xTkfc3Oh1'
-            }
-        })
-        .then((res) => {
+    axios.delete(url, {headers})
+        .then(() => {
             getOrder();
+            setTimeout(function(){ alert("成功刪除所有訂單");}, 1000);
         })
         .catch((error) => {
             console.log(error);
@@ -156,7 +126,7 @@ function delAllOrder(e) {
     delAllBtn.addEventListener('click', delAllOrder);
 })();
 
-function renderC3() {
+function renderC3(orderData) {
     let totalObj = {};
     orderData.forEach((item) => {
         for(let i = 0; i < item.products.length; i++) {

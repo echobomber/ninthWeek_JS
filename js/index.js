@@ -1,8 +1,13 @@
 // 以下開始撰寫 JS 程式碼
 let productWrap = document.querySelector('.productWrap');
-let productSelect = document.querySelector('.productSelect');
+let productSelect = document.querySelector('#productSelect');
 //
-let keyWordSearch = document.querySelector('#keyWordSearch');
+let keyWordInput = document.querySelector('#keyWord');
+let keyWordBtn = document.querySelector('.keyWordBtn');
+keyWordBtn.addEventListener('click', keywordFilter);
+//
+let cartTable = document.querySelector('.shoppingCart-table');
+
 const api_path = "jordan990301";
 const baseUrl = "https://hexschoollivejs.herokuapp.com";
 
@@ -10,7 +15,6 @@ let products = []; // 原始資料
 let categoryName = [];
 
 function getProduct() {
-    let vm = this;
     let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/products`;
     axios.get(url)
         .then((res) => {
@@ -24,7 +28,6 @@ function getProduct() {
         })
 }
 function filterCategories() {
-    let vm = this;
     categoryName = products.map((item) => {
         return item.category;
     })
@@ -42,114 +45,149 @@ function renderProductList() {
     })
 }
 function addCart(item) {    
-    // 要用 closure 才可以代入 e + 其他參數
-    return function(e) {
-        e.preventDefault();
-        // console.log(item);
-        let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/carts`;
-        let data = {
-            "data": {
-              "productId": `${item.id}`,
-              "quantity": 1
-            }
+    let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/carts`;
+    let data = {
+        data: {
+            productId: `${item.id}`,
+            quantity: 1
         }
-        axios.post(url, {...data})
-            .then((res) => {
-                console.log(res);
-                renderCart();
-            })
-            .catch((error) => {
-                console.log(error);
-            })
     }
+    axios.post(url, {...data})
+        .then(() => {
+            getCarts();
+            setTimeout(function(){ alert("成功加入購物車");}, 1000);
+        })
+        .catch((error) => {
+            console.log(error);
+        })
 }
-function delSingleCart(item) {
-    return function(e) {
-        e.preventDefault();
-        let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/carts/${item.id}`;
+function delSingleCart(id) {
+    let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/carts/${id}`;
         axios.delete(url)
-            .then((res) => {
-                console.log(res);
-                renderCart();
+            .then(() => {
+                getCarts();
+                setTimeout(function(){ alert("成功刪除");}, 1000);
             })
             .catch((error) => {
                 console.log(error);
             })
-    }
 }
 function delAllCart(e) {
     e.preventDefault();
     let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/carts`;
     axios.delete(url)
+        .then(() => {
+            getCarts();
+            setTimeout(function(){ alert("成功刪除所有品項");}, 1000);
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+}
+
+let cartData;
+function getCarts() {
+    let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/carts`;
+    axios.get(url)
         .then((res) => {
-            console.log(res);
+            cartData = res.data;
             renderCart();
         })
         .catch((error) => {
             console.log(error);
         })
 }
+
 function renderCart() {
-    let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/carts`;
-    let cartTable = document.querySelector('.shoppingCart-table');
+    let data = cartData.carts;
     let str = '';
-    axios.get(url)
-        .then((res) => {
-            let data = res.data.carts;
-            if(data[0]){
-                str += `
-                    <tr>
-                        <th width="40%">品項</th>
-                        <th width="15%">單價</th>
-                        <th width="15%">數量</th>
-                        <th width="15%">金額</th>
-                        <th width="15%"></th>
-                    </tr>`;
-                data.forEach((item, i) => {
-                    str += `
-                    <tr>
-                        <td>
-                            <div class="cardItem-title">
-                                <img src="${item.product.images}" alt="">
-                                <p>${item.product.title}</p>
-                            </div>
-                        </td>
-                        <td>NT$${item.product.price}</td>
-                        <td>${item.quantity}</td>
-                        <td>NT$${item.product.price * item.quantity}</td>
-                        <td class="discardBtn">
-                            <a href="#" class="material-icons">
-                                clear
-                            </a>
-                        </td>
-                    </tr>`;
-                })
-                str += `
-                    <tr>
-                        <td>
-                            <a href="#" class="discardAllBtn">刪除所有品項</a>
-                        </td>
-                        <td></td>
-                        <td></td>
-                        <td>
-                            <p>總金額</p>
-                        </td>
-                        <td>NT$${res.data.finalTotal}</td>
-                    </tr>`;
+    if(data[0]) {
+        str += `
+        <tr>
+            <th width="40%">品項</th>
+            <th width="15%">單價</th>
+            <th width="15%">數量</th>
+            <th width="15%">金額</th>
+            <th width="15%"></th>
+        </tr>`;
+        data.forEach((item) => {
+            str += `
+            <tr>
+                <td>
+                    <div class="cardItem-title">
+                        <img src="${item.product.images}" alt="">
+                        <p>${item.product.title}</p>
+                    </div>
+                </td>
+                <td>NT$${item.product.price}</td>
+                <td>
+                    <div class="cartQuantity">
+                        <span class="material-icons cartQuantity-icon" data-quantity="${item.quantity - 1}" data-id="${item.id}">remove</span>
+                        ${item.quantity}
+                        <span class="material-icons cartQuantity-icon" data-quantity="${item.quantity + 1}" data-id="${item.id}">add</span>
+                    </div>
+                </td>
+                <td>NT$${item.product.price * item.quantity}</td>
+                <td class="discardBtn">
+                    <a href="#" class="material-icons">
+                        clear
+                    </a>
+                </td>
+            </tr>`;
+        })
+        str += `
+            <tr>
+                <td>
+                    <a href="#" class="outlineBtn discardAllCart">刪除所有品項</a>
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                    <p>總金額</p>
+                </td>
+                <td>NT$${cartData.finalTotal}</td>
+            </tr>`;
+    }
+    cartTable.innerHTML = str;
+    data.forEach((item, i) => {
+        document.querySelectorAll('.discardBtn a')[i].addEventListener('click', function(e) {
+            e.preventDefault();
+            delSingleCart(item.id);
+        });
+    })
+    let discardAllBtn = document.querySelector('.discardAllCart');
+    discardAllBtn.addEventListener('click', delAllCart);
+    //
+    let cartQuantityIcon = document.querySelectorAll('.cartQuantity-icon');
+    cartQuantityIcon.forEach((item) => {
+        item.addEventListener('click', function(event) {
+            editCartQuantity(event);
+        })
+    })
+}
+function editCartQuantity(event) {
+    let id = event.target.dataset.id;
+    let quantity = parseInt(event.target.dataset.quantity);
+    if(!quantity) {
+        delSingleCart(id);
+    }else {
+        let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/carts`;
+        let data = {
+            data: {
+                id,
+                quantity
             }
-            cartTable.innerHTML = str;
-            data.forEach((item, i) => {
-                document.querySelectorAll('.discardBtn a')[i].addEventListener('click', delSingleCart(item));
+        }
+        axios.patch(url, {...data})
+            .then(() => {
+                getCarts();
             })
-            let discardAllBtn = document.querySelector('.discardAllBtn');
-            discardAllBtn.addEventListener('click', delAllCart);
-        })
-        .catch((error) => {
-            console.log(error);
-        })
+            .catch((error) => {
+                console.log(error);
+            })
+    }
 }
 function renderProduct(targetProduct) {
-    let vm = this;
     let str = '';
     targetProduct.forEach((item, i) => {
         str += `
@@ -165,7 +203,10 @@ function renderProduct(targetProduct) {
     })
     productWrap.innerHTML = str;
     targetProduct.forEach((item, i) => {
-        document.querySelectorAll('#addCardBtn')[i].addEventListener('click', addCart(item));
+        document.querySelectorAll('#addCardBtn')[i].addEventListener('click', function(e) {
+            e.preventDefault();
+            addCart(item);
+        });
     })
     /* select 不可以用 innerHTML 來加入 option， 切換的時候文字不會跟著換*/ 
     // str = `<option value="全部">全部</option>`;
@@ -174,9 +215,9 @@ function renderProduct(targetProduct) {
     // })
     // productSelect.innerHTML = str;
 }
+
 function productFilter(e) {
     e.preventDefault();
-    let vm = this;
     if(e.target.value === "全部") {
         renderProduct(products);
     }else{
@@ -186,17 +227,19 @@ function productFilter(e) {
         renderProduct(showProduct);
     }
 }
-function init() {
-    getProduct();
-    renderCart();
-}
-//
-function keywordFilter() {
-    let keyword = document.querySelector('#keyWord').value.trim();
+// 關鍵字搜尋
+function keywordFilter(e) {
+    e.preventDefault();
+    let keyWord = keyWordInput.value.trim();
     let showProduct = products.filter((item) => {
-        return item.title.match(keyword);
+        return item.title.match(keyWord);
     })
     renderProduct(showProduct);
+}
+
+function init() {
+    getProduct();
+    getCarts();
 }
 
 init();
@@ -214,11 +257,18 @@ productSelect.addEventListener('change', productFilter);
             presence: {
                 message: "是必填的欄位"
             },
+            length: {
+                minimum: 8,
+                message: "號碼需超過 8 碼"
+            }
         },
         "Email": {
             presence: {
                 message: "是必填的欄位",
             },
+            email: {
+                message: "信箱格式不正確",
+            }
         },
         "寄送地址": {
             presence: {
@@ -251,7 +301,7 @@ productSelect.addEventListener('change', productFilter);
         if (errors) {
             console.log(errors);
             showErrors(errors); // 顯示錯誤訊息，errors 是物件形式
-        } else {
+        } else if(cartData.carts[0]){
             console.log("驗證成功");
             let name = document.querySelector("#customerName").value;
             let tel = document.querySelector("#customerPhone").value;
@@ -261,25 +311,27 @@ productSelect.addEventListener('change', productFilter);
 
             let url = `${baseUrl}/api/livejs/v1/customer/${api_path}/orders`;
             let data = {
-                "data": {
-                    "user": {
-                        "name": name,
-                        "tel": tel,
-                        "email": email,
-                        "address": address,
-                        "payment": payment
+                data: {
+                    user: {
+                        name,
+                        tel,
+                        email,
+                        address,
+                        payment
                      }
                 }
             }
             axios.post(url, {...data})
                 .then((res) => {
                     console.log(res);
-                    renderCart();
-                    location.href = "/pages/order.html";
+                    getCarts();
+                    location.href = "ninthWeek_JS/pages/order.html";
                 })
                 .catch((error) => {
                     console.log(error);
                 })
+        }else {
+            alert('購物車不得為空');
         }
     }
     function showErrors(errors) {
