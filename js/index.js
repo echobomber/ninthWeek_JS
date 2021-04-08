@@ -325,7 +325,7 @@ productSelect.addEventListener('change', productFilter);
                 .then((res) => {
                     console.log(res);
                     getCarts();
-                    location.href = "ninthWeek_JS/pages/order.html";
+                    location.href = "https://echobomber.github.io/ninthWeek_JS/pages/order.html";
                 })
                 .catch((error) => {
                     console.log(error);
