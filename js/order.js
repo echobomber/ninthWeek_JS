@@ -10,7 +10,6 @@ function getOrder() {
         .then((res) => {
             let orderData = res.data.orders;
             renderTable(orderData);
-            // renderC3(orderData);
             filterC3Title(orderData);
         })
         .catch((error) => {
