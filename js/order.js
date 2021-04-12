@@ -10,7 +10,8 @@ function getOrder() {
         .then((res) => {
             let orderData = res.data.orders;
             renderTable(orderData);
-            renderC3(orderData);
+            // renderC3(orderData);
+            filterC3Title(orderData);
         })
         .catch((error) => {
             console.log(error);
@@ -126,30 +127,51 @@ function delAllOrder(e) {
     delAllBtn.addEventListener('click', delAllOrder);
 })();
 
-function renderC3(orderData) {
-    let totalObj = {};
+// 04/12 作業修改處
+function filterC3Title(orderData) {
+    let objNum = {};
     orderData.forEach((item) => {
         for(let i = 0; i < item.products.length; i++) {
-            if(totalObj[item.products[i].title] === undefined) {
-                totalObj[item.products[i].title] = 1;
+            if(objNum[item.products[i].title] === undefined) {
+                objNum[item.products[i].title] = item.products[i].quantity;
             }else{
-                totalObj[item.products[i].title] += 1;
+                objNum[item.products[i].title] += item.products[i].quantity;
             }
         }
     })
     let c3Data = [];
-    let productName = Object.keys(totalObj);
+    let productName = Object.keys(objNum);
     productName.forEach((item) => {
         let arr = [];
         arr.push(item);
-        arr.push(totalObj[item]);
+        arr.push(objNum[item]);
         c3Data.push(arr);
     })
-    //
+    c3Data.sort((a, b) => {
+        a = a[1];
+        b = b[1];
+        return b - a;
+    })
+    // 超出排名前三的都歸納到其他
+    let outRank = 0;
+    c3Data.forEach((item, i) => {
+        if (i > 2) {
+            outRank += item[1];
+        }
+    })
+    c3Data = [c3Data[0], c3Data[1], c3Data[2], ["其他", outRank]];
+    renderC3(c3Data);
+}
+
+function renderC3(c3Data) {
     let dataColor = {};
+    let c3DataTitle = [];
+    c3Data.forEach((item) => {
+        c3DataTitle.push(item[0]);
+    })
     let colorCode = ["#301E5F", "#5434A7", "#9D7FEA", "#6A33F8"];
-    productName.forEach((item, i) => {
-        dataColor[item] = colorCode[i%4];
+    c3DataTitle.forEach((item, i) => {
+        dataColor[item] = colorCode[i];
     })
     let chart = c3.generate({
         bindto: '#chart', // HTML 元素綁定

@@ -230,9 +230,9 @@ function productFilter(e) {
 // 關鍵字搜尋
 function keywordFilter(e) {
     e.preventDefault();
-    let keyWord = keyWordInput.value.trim();
+    let keyWord = keyWordInput.value.trim().toLowerCase();
     let showProduct = products.filter((item) => {
-        return item.title.match(keyWord);
+        return item.title.toLowerCase().match(keyWord);
     })
     renderProduct(showProduct);
 }
