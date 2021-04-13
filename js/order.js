@@ -151,15 +151,20 @@ function filterC3Title(orderData) {
         b = b[1];
         return b - a;
     })
+    console.log(c3Data)
     // 超出排名前三的都歸納到其他
-    let outRank = 0;
-    c3Data.forEach((item, i) => {
-        if (i > 2) {
-            outRank += item[1];
-        }
-    })
-    c3Data = [c3Data[0], c3Data[1], c3Data[2], ["其他", outRank]];
-    renderC3(c3Data);
+    if(c3Data.length > 3) {
+        let outRank = 0;
+        c3Data.forEach((item, i) => {
+            if (i > 2) {
+                outRank += item[1];
+            }
+        })
+        c3Data = [c3Data[0], c3Data[1], c3Data[2], ["其他", outRank]];
+        renderC3(c3Data);
+    }else {
+        renderC3(c3Data);
+    }
 }
 
 function renderC3(c3Data) {
