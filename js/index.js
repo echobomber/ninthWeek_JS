@@ -9,7 +9,7 @@ keyWordBtn.addEventListener('click', keywordFilter);
 let cartTable = document.querySelector('.shoppingCart-table');
 
 const api_path = "jordan990301";
-const baseUrl = "https://hexschoollivejs.herokuapp.com";
+const baseUrl = "https://livejs-api.hexschool.io";
 
 let products = []; // 原始資料
 let categoryName = [];

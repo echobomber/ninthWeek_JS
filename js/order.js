@@ -1,5 +1,5 @@
 const api_path = "jordan990301";
-const baseUrl = "https://hexschoollivejs.herokuapp.com";
+const baseUrl = "https://livejs-api.hexschool.io";
 const headers = {Authorization: 'PBZzz6dBY3Q67V6SPh4xTkfc3Oh1'};
 let orderTable = document.querySelector('.orderPage-table');
 let delAllBtn = document.querySelector('.discardAllOrder');
